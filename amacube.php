@@ -57,6 +57,22 @@ class amacube extends rcube_plugin
 		// Send feedback
 		$this->feedback();
     }
+
+    private function load_driver()
+    {
+        if (is_object($this->amacube->driver)) {
+            return;
+        }
+
+        $driver_name  = $this->rc->config->get('amacube_driver', 'ldap');
+        $driver_class = $driver_name . '_driver';
+
+        require_once($this->home . '/drivers/amacube_driver.php');
+        require_once($this->home . '/drivers/' . $driver_name . '/' . $driver_class . '.php');
+
+        $this->amacube->driver = new $driver_class($this);
+    }
+
 	// Initialize GUI
     function gui_init()
     {
