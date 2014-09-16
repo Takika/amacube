@@ -166,6 +166,38 @@ class ldap_driver extends amacube_driver
 
     }
 
+    public function is_active($type)
+    {
+		if ($type == 'virus' || $type == 'spam') {
+			return !$this->policy_setting['bypass_' . $type . '_checks'];
+		}
+
+		return false;
+    }
+
+    public function is_delivery($type,$method)
+    {
+        if ($type == 'banned') {
+            $lover = $type . '_files_lover';
+        } else {
+            $lover = $type . '_lover';
+        }
+
+        if ($method == 'deliver' && $this->policy_setting[$lover]) {
+            return true;
+        }
+
+        if ($method == 'quarantine' && !$this->policy_setting[$lover] && $this->policy_setting[$type . '_quarantine_to']) {
+            return true;
+        }
+
+        if ($method == 'discard' && !$this->policy_setting[$lover] && !$this->policy_setting[$type . '_quarantine_to']) {
+            return true;
+        }
+
+        return false;
+    }
+
 }
 
 ?>
