@@ -3,40 +3,41 @@
 class amacube extends rcube_plugin
 {
     // All tasks excluding 'login' and 'logout'
-    public 	$task 		= '?(?!login|logout).*';
-	private	$rc;
-	private	$amacube;
+    public $task = '?(?!login|logout).*';
+
+    private	$rc;
+    private	$amacube;
 
     function init()
     {
-    	$this->rc 						= rcmail::get_instance();
-		$this->amacube 					= new stdClass;
+        $this->rc      = rcmail::get_instance();
+        $this->amacube = new stdClass;
 
-    	// Load plugin config
+        // Load plugin config
         $this->load_config();
 
-		// Amacube storage on rcmail instance
-		$this->rc->amacube 				= new stdClass;
-		$this->rc->amacube->errors 		= array();
-		$this->rc->amacube->feedback 	= array();
+        // Amacube storage on rcmail instance
+        $this->rc->amacube           = new stdClass;
+        $this->rc->amacube->errors   = array();
+        $this->rc->amacube->feedback = array();
 
         if ($this->rc->config->get('amacube_accounts_db_enabled')) {
-    		// Check accounts database for catchall enabled
-    		if ($this->rc->config->get('amacube_accounts_db_dsn')) {
-    			include_once('AccountConfig.php');
-    			$this->amacube->account = new AccountConfig($this->rc->config->get('amacube_accounts_db_dsn'));
-    			// Check for account filter
-    			if ($this->amacube->account->initialized && isset($this->amacube->account->filter)) {
-    				// Store on rcmail instance
-    				$this->rc->amacube->filter = $this->amacube->account->filter;
-    			}
+            // Check accounts database for catchall enabled
+            if ($this->rc->config->get('amacube_accounts_db_dsn')) {
+                include_once('AccountConfig.php');
+                $this->amacube->account = new AccountConfig($this->rc->config->get('amacube_accounts_db_dsn'));
+                // Check for account filter
+                if ($this->amacube->account->initialized && isset($this->amacube->account->filter)) {
+                    // Store on rcmail instance
+                    $this->rc->amacube->filter = $this->amacube->account->filter;
+                }
 
-    			// Check for account catchall
-    			if ($this->amacube->account->initialized && isset($this->amacube->account->catchall)) {
-    				// Store on rcmail instance
-    				$this->rc->amacube->catchall = $this->amacube->account->catchall;
-    			}
-    		}
+                // Check for account catchall
+                if ($this->amacube->account->initialized && isset($this->amacube->account->catchall)) {
+                    // Store on rcmail instance
+                    $this->rc->amacube->catchall = $this->amacube->account->catchall;
+                }
+            }
         }
 
         // Load amacube backend driver
@@ -79,25 +80,25 @@ class amacube extends rcube_plugin
 		}
         */
 
-		// Add localization
+        // Add localization
         $this->add_texts('localization/', true);
 
-		// Register tasks & actions
+        // Register tasks & actions
         if ($this->task == 'settings') {
             $this->register_action('plugin.amacube-settings', array($this, 'settings_init'));
         }
 
         // Add quarantine specific task and action only when we want to use quarantine
         if ($this->rc->config->get('amacube_quarantine_enabled')) {
-    		$this->register_task('quarantine');
-    		$this->register_action('plugin.amacube-quarantine', array($this, 'quarantine_init'));
+            $this->register_task('quarantine');
+            $this->register_action('plugin.amacube-quarantine', array($this, 'quarantine_init'));
         }
 
-		// Initialize GUI
+        // Initialize GUI
         $this->add_hook('startup', array($this, 'gui_init'));
 
-		// Send feedback
-		$this->feedback();
+        // Send feedback
+        $this->feedback();
     }
 
     private function load_driver()
@@ -115,12 +116,12 @@ class amacube extends rcube_plugin
         $this->amacube->driver = new $driver_class($this);
     }
 
-	// Initialize GUI
+    // Initialize GUI
     function gui_init()
     {
         if ($this->task == 'settings') {
-        	// Add settings tab
-        	$this->add_hook('settings_actions', array($this, 'settings_actions'));
+            // Add settings tab
+            $this->add_hook('settings_actions', array($this, 'settings_actions'));
         }
 
         if ($this->rc->config->get('amacube_quarantine_enabled')) {
@@ -134,7 +135,7 @@ class amacube extends rcube_plugin
             ), 'taskbar');
         }
 
-		// Add javascript
+        // Add javascript
         $this->include_script('amacube.js');
 
         // Add stylesheet
@@ -144,10 +145,16 @@ class amacube extends rcube_plugin
         }
     }
 
-	// Register as settings action
+    // Register as settings action
     function settings_actions($args)
     {
-        $args['actions'][] = array('action' => 'plugin.amacube-settings', 'class' => 'filter-settings', 'label' => 'filter_settings_pagetitle', 'domain' => 'amacube');
+        $args['actions'][] = array(
+            'action' => 'plugin.amacube-settings',
+            'class'  => 'filter-settings',
+            'label'  => 'filter_settings_pagetitle',
+            'domain' => 'amacube'
+        );
+
         return $args;
     }
 
@@ -159,6 +166,7 @@ class amacube extends rcube_plugin
         $this->rc->output->set_pagetitle(Q($this->gettext('filter_settings_pagetitle')));
         $this->rc->output->send('plugin');
     }
+
     // Initialize quarantine task
     function quarantine_init()
     {
