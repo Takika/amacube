@@ -11,49 +11,91 @@ class amacube extends rcube_plugin
     {
     	$this->rc 						= rcmail::get_instance();
 		$this->amacube 					= new stdClass;
+
     	// Load plugin config
         $this->load_config();
+
 		// Amacube storage on rcmail instance
 		$this->rc->amacube 				= new stdClass;
 		$this->rc->amacube->errors 		= array();
 		$this->rc->amacube->feedback 	= array();
-		// Check accounts database for catchall enabled
-		if ($this->rc->config->get('amacube_accounts_db_dsn')) {
-			include_once('AccountConfig.php');
-			$this->amacube->account = new AccountConfig($this->rc->config->get('amacube_accounts_db_dsn'));
-			// Check for account filter
-			if ($this->amacube->account->initialized && isset($this->amacube->account->filter)) {
-				// Store on rcmail instance
-				$this->rc->amacube->filter 		= $this->amacube->account->filter;
-			}
-			// Check for account catchall
-			if ($this->amacube->account->initialized && isset($this->amacube->account->catchall)) {
-				// Store on rcmail instance
-				$this->rc->amacube->catchall 	= $this->amacube->account->catchall;
-			}
-		}
+
+        if ($this->rc->config->get('amacube_accounts_db_enabled')) {
+    		// Check accounts database for catchall enabled
+    		if ($this->rc->config->get('amacube_accounts_db_dsn')) {
+    			include_once('AccountConfig.php');
+    			$this->amacube->account = new AccountConfig($this->rc->config->get('amacube_accounts_db_dsn'));
+    			// Check for account filter
+    			if ($this->amacube->account->initialized && isset($this->amacube->account->filter)) {
+    				// Store on rcmail instance
+    				$this->rc->amacube->filter = $this->amacube->account->filter;
+    			}
+
+    			// Check for account catchall
+    			if ($this->amacube->account->initialized && isset($this->amacube->account->catchall)) {
+    				// Store on rcmail instance
+    				$this->rc->amacube->catchall = $this->amacube->account->catchall;
+    			}
+    		}
+        }
+
+        // Load amacube backend driver
+        $this->load_driver();
+
+        if (!$this->amacube->driver->initialized) {
+            $this->rc->amacube->errors[] = 'backend_initialization_error';
+        } else {
+            // Check if the driver support automatic user creation
+            if ($this->amacube->driver->auto_create_user) {
+                if ($this->amacube->driver->save()) {
+                    $this->rc->amacube->feedback[] = array(
+                        'type'    => 'confirmation',
+                        'message' => 'policy_default_message'
+                    );
+                }
+            }
+        }
+
+        /* Comment out original code
 		// Load amavis config
         include_once('AmavisConfig.php');
         $this->amacube->config = new AmavisConfig($this->rc->config->get('amacube_db_dsn'));
 		// Check for user & auto create option (disable plugin)
-		if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') !== true) { return; }
+		if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') !== true) {
+		    return;
+		}
+
 		// Check for writing default user & config
 		if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') === true) {
 			// Check accounts database for filter enabled
-			if (isset($this->rc->amacube->filter) && $this->rc->amacube->filter == false) { return; }
+			if (isset($this->rc->amacube->filter) && $this->rc->amacube->filter == false) {
+			    return;
+			}
+
 			// Write default user & config
 			if ($this->amacube->config->write_to_db()) {
 				$this->rc->amacube->feedback[] = array('type' => 'confirmation', 'message' => 'policy_default_message');
 			}
 		}
+        */
+
 		// Add localization
         $this->add_texts('localization/', true);
+
 		// Register tasks & actions
-        $this->register_action('plugin.amacube-settings', array($this, 'settings_init'));
-		$this->register_task('quarantine');
-		$this->register_action('plugin.amacube-quarantine', array($this, 'quarantine_init'));
+        if ($this->task == 'settings') {
+            $this->register_action('plugin.amacube-settings', array($this, 'settings_init'));
+        }
+
+        // Add quarantine specific task and action only when we want to use quarantine
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+    		$this->register_task('quarantine');
+    		$this->register_action('plugin.amacube-quarantine', array($this, 'quarantine_init'));
+        }
+
 		// Initialize GUI
         $this->add_hook('startup', array($this, 'gui_init'));
+
 		// Send feedback
 		$this->feedback();
     }
@@ -76,30 +118,39 @@ class amacube extends rcube_plugin
 	// Initialize GUI
     function gui_init()
     {
-    	// Add settings tab
-    	$this->add_hook('settings_actions', array($this, 'settings_actions'));
-        // Add taskbar button
-        $this->add_button(array(
-            'command'    => 'quarantine',
-            'class'      => 'button-quarantine',
-            'classsel'   => 'button-quarantine button-selected',
-            'innerclass' => 'button-inner',
-            'label'      => 'amacube.quarantine',
-        ), 'taskbar');
+        if ($this->task == 'settings') {
+        	// Add settings tab
+        	$this->add_hook('settings_actions', array($this, 'settings_actions'));
+        }
+
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            // Add taskbar button
+            $this->add_button(array(
+                'command'    => 'quarantine',
+                'class'      => 'button-quarantine',
+                'classsel'   => 'button-quarantine button-selected',
+                'innerclass' => 'button-inner',
+                'label'      => 'amacube.quarantine',
+            ), 'taskbar');
+        }
+
 		// Add javascript
         $this->include_script('amacube.js');
+
         // Add stylesheet
         $skin_path = $this->local_skin_path();
         if (is_file($this->home . "/$skin_path/amacube.css")) {
             $this->include_stylesheet("$skin_path/amacube.css");
         }
     }
+
 	// Register as settings action
     function settings_actions($args)
     {
         $args['actions'][] = array('action' => 'plugin.amacube-settings', 'class' => 'filter-settings', 'label' => 'filter_settings_pagetitle', 'domain' => 'amacube');
         return $args;
     }
+
     // Initialize settings task
     function settings_init()
     {
