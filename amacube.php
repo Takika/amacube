@@ -58,26 +58,26 @@ class amacube extends rcube_plugin
         }
 
         /* Comment out original code
-		// Load amavis config
+        // Load amavis config
         include_once('AmavisConfig.php');
         $this->amacube->config = new AmavisConfig($this->rc->config->get('amacube_db_dsn'));
-		// Check for user & auto create option (disable plugin)
-		if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') !== true) {
-		    return;
-		}
+        // Check for user & auto create option (disable plugin)
+        if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') !== true) {
+            return;
+        }
 
-		// Check for writing default user & config
-		if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') === true) {
-			// Check accounts database for filter enabled
-			if (isset($this->rc->amacube->filter) && $this->rc->amacube->filter == false) {
-			    return;
-			}
+        // Check for writing default user & config
+        if (!$this->amacube->config->initialized && $this->rc->config->get('amacube_auto_create_user') === true) {
+            // Check accounts database for filter enabled
+            if (isset($this->rc->amacube->filter) && $this->rc->amacube->filter == false) {
+                return;
+            }
 
-			// Write default user & config
-			if ($this->amacube->config->write_to_db()) {
-				$this->rc->amacube->feedback[] = array('type' => 'confirmation', 'message' => 'policy_default_message');
-			}
-		}
+            // Write default user & config
+            if ($this->amacube->config->write_to_db()) {
+                $this->rc->amacube->feedback[] = array('type' => 'confirmation', 'message' => 'policy_default_message');
+            }
+        }
         */
 
         // Add localization
@@ -103,17 +103,17 @@ class amacube extends rcube_plugin
 
     private function load_driver()
     {
-        if (is_object($this->amacube->driver)) {
-            return;
+        if (!is_object($this->amacube->driver)) {
+            $driver_name  = $this->rc->config->get('amacube_driver', 'ldap');
+            $driver_class = $driver_name . '_driver';
+
+            require_once($this->home . '/drivers/amacube_driver.php');
+            require_once($this->home . '/drivers/' . $driver_name . '/' . $driver_class . '.php');
+
+            $this->amacube->driver = new $driver_class($this);
         }
 
-        $driver_name  = $this->rc->config->get('amacube_driver', 'ldap');
-        $driver_class = $driver_name . '_driver';
-
-        require_once($this->home . '/drivers/amacube_driver.php');
-        require_once($this->home . '/drivers/' . $driver_name . '/' . $driver_class . '.php');
-
-        $this->amacube->driver = new $driver_class($this);
+        return $this->amacube->driver->initialized;
     }
 
     // Initialize GUI
@@ -170,47 +170,55 @@ class amacube extends rcube_plugin
     // Initialize quarantine task
     function quarantine_init()
     {
-		if (get_input_value('_remote', RCUBE_INPUT_POST, false) == 1) {
-			// Client pagination request
-			$this->quarantine_display(true);
-		} else {
-			// Client page request
-	        $this->register_handler('plugin.countdisplay', array($this, 'quarantine_display_count'));
-	        $this->register_handler('plugin.body', array($this, 'quarantine_display'));
-	        $this->rc->output->set_pagetitle(Q($this->gettext('quarantine_pagetitle')));
-			// Use amacube quarantine page template
-			$this->rc->output->send('amacube.quarantine');
-		}
+        if (get_input_value('_remote', RCUBE_INPUT_POST, false) == 1) {
+            // Client pagination request
+            $this->quarantine_display(true);
+        } else {
+            // Client page request
+            $this->register_handler('plugin.countdisplay', array($this, 'quarantine_display_count'));
+            $this->register_handler('plugin.body', array($this, 'quarantine_display'));
+            $this->rc->output->set_pagetitle(Q($this->gettext('quarantine_pagetitle')));
+
+            // Use amacube quarantine page template
+            $this->rc->output->send('amacube.quarantine');
+        }
     }
+
     // Display settings action
     function settings_display()
     {
-		// Include settings class
-		if (!$this->amacube->config) {
-        	include_once('AmavisConfig.php');
-        	$this->amacube->config = new AmavisConfig($this->rc->config->get('amacube_db_dsn'));
-		}
-		// Parse form
-		if (get_input_value('_token', RCUBE_INPUT_POST, false)) { $this->settings_post(); }
-		
+        // Parse form
+        if (get_input_value('_token', RCUBE_INPUT_POST, false)) {
+            $this->settings_post();
+        }
+
+        // Include driver class if needed
+        if (!$this->load_driver()) {
+            return;
+        }
+
         // Create output
         $output = '';
-		// Add header to output
-		$output .= html::tag('h1', array('class' => 'boxtitle'), Q($this->gettext('filter_settings_pagetitle')));
-		
+        // Add header to output
+        $output .= html::tag('h1', array('class' => 'boxtitle'), Q($this->gettext('filter_settings_pagetitle')));
+
         // Create output : table (checks)
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+
         // Create output : table : checkbox : spam check
         $output_table->add('title', html::label('activate_spam_check', $this->gettext('spam_check')));
-		$output_table->add('',$this->_show_checkbox('activate_spam_check', $this->amacube->config->is_active('spam')));
-		// Create output : table : checkbox : virus check
+        $output_table->add('', $this->_show_checkbox('activate_spam_check', $this->amacube->driver->is_active('spam')));
+
+        // Create output : table : checkbox : virus check
         $output_table->add('title', html::label('activate_virus_check', $this->gettext('virus_check')));
-		$output_table->add('',$this->_show_checkbox('activate_virus_check', $this->amacube->config->is_active('virus')));
-		// Create output : fieldset
-		$output_legend = html::tag('legend', null , $this->gettext('section_checks'));
-		$output_fieldset = html::tag('fieldset', array('class' => 'checks'),$output_legend.$output_table->show());
-		// Create output : activate
-		$output_checks = $output_fieldset;
+        $output_table->add('', $this->_show_checkbox('activate_virus_check', $this->amacube->driver->is_active('virus')));
+
+        // Create output : fieldset
+        $output_legend   = html::tag('legend', null, $this->gettext('section_checks'));
+        $output_fieldset = html::tag('fieldset', array('class' => 'checks'), $output_legend . $output_table->show());
+
+        // Create output : activate
+        $output_checks = $output_fieldset;
 
         // Create output : table (delivery)
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
