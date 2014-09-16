@@ -39,7 +39,7 @@ class ldap_driver extends amacube_driver
 
     protected $ldap;
 
-    public $ready = false;
+    public $initialized = false;
 
     public function __construct($amacube)
     {
@@ -78,23 +78,23 @@ class ldap_driver extends amacube_driver
 
     private function _ldap_connect()
     {
-        if (!$this->ready) {
+        if (!$this->initialized) {
             $this->ldap = new rcube_ldap_generic($this->config);
             $this->ldap->set_cache(null);
-            if ($this->ready = $this->ldap->connect()) {
+            if ($this->initialized = $this->ldap->connect()) {
                 $dn = $this->rc->config->get('amacube_ldap_binddn');
                 $pw = $this->rc->config->get('amacube_ldap_bindpw');
-                $this->ready = $this->ldap->bind($dn, $pw);
+                $this->initialized = $this->ldap->bind($dn, $pw);
                 $this->ldap->set_debug(true);
             }
         }
 
-        return $this->ready;
+        return $this->initialized;
     }
 
     private function get_policy_from_ldap()
     {
-        if (!$this->ready) {
+        if (!$this->initialized) {
             return;
         }
 
