@@ -36,6 +36,9 @@ $rcmail_config['amacube_db_dsn'] = 'mysql://<MYSQL-USER>:<MYSQL-PASSWORD>@<MYSQL
 $rcmail_config['amacube_amavis_host'] = 'AMAVIS_HOST';
 $rcmail_config['amacube_amavis_port'] = 'AMAVIS_PORT';
 
+// Set this variable to true if you want to use the accounts db
+$rcmail_config['amacube_accounts_db_enabled'] = false;
+
 // The database connection settings where mailbox accounts are stored.
 // When specified amacube will try to get catchall and filter fields from this table
 // See mysql.schema for more details.
