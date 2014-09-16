@@ -1,4 +1,30 @@
 <?php
+// Backend driver configuration
+// Available drivers: 'ldap', 'database'
+$rcmail_config['amacube_driver'] = 'ldap';
+
+$rcmail_config['amacube_ldap_config'] = array(
+    'hosts'           => array(
+        '<LDAP-HOST>'
+    ),
+    'port'            => <LDAP-PORT>,
+    'use_tls'         => false,
+    'ldap_version'    => 3,             // using LDAPv3
+    'auth_method'     => '',            // SASL authentication method (for proxy auth), e.g. DIGEST-MD5
+    'attributes'      => array(
+    ),                                  // List of attributes to read from the server
+    'vlv'             => false,         // Enable Virtual List View to more efficiently fetch paginated data (if server supports it)
+    'config_root_dn'  => 'cn=config',   // Root DN to read config (e.g. vlv indexes) from
+    'numsub_filter'   => '(objectClass=organizationalUnit)',   // with VLV, we also use numSubOrdinates to query the total number of records. Set this filter to get all numSubOrdinates attributes for counting
+    'sizelimit'       => '0',           // Enables you to limit the count of entries fetched. Setting this to 0 means no limit.
+    'timelimit'       => '0',           // Sets the number of seconds how long is spend on the search. Setting this to 0 means no limit.
+    'network_timeout' => 10,            // The timeout (in seconds) for connect + bind arrempts. This is only supported in PHP >= 5.3.0 with OpenLDAP 2.x
+    'referrals'       => false,         // Sets the LDAP_OPT_REFERRALS option. Mostly used in multi-domain Active Directory setups
+);
+
+$rcmail_config['amacube_ldap_binddn'] = '<LDAP-USER>';
+$rcmail_config['amacube_ldap_bindpw'] = '<LDAP-PASSWORD>';
+$rcmail_config['amacube_ldap_base'] = '<LDAP-BASE>';
 
 // The database connection settings where amavis stores settings and emails.
 // See mysql.schema for more details.
