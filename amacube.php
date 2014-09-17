@@ -498,8 +498,8 @@ class amacube extends rcube_plugin
         $spam_kill_level = get_input_value('spam_kill_level', RCUBE_INPUT_POST, false);
 
         // Apply the levels post vars
-        $tag_level_min = $this->rc->config->get('amacube_amavis_tag_level_min');
-        $tag_level_max = $this->rc->config->get('amacube_amavis_tag_level_max');
+        $tag_level_min = $this->rc->config->get('amacube_amavis_tag_level_min', -20);
+        $tag_level_max = $this->rc->config->get('amacube_amavis_tag_level_max', 999);
         if (!is_numeric($spam_tag_level) || $spam_tag_level < $tag_level_min || $spam_tag_level > $tag_level_max) {
             $this->rc->amacube->errors[] = 'spam_tag_level_error';
         } else {
@@ -539,8 +539,14 @@ class amacube extends rcube_plugin
         }
 
         // Verify policy config
-        if ($this->amacube->driver->verify_policy_array() && $this->amacube->driver->save()) {
-            $this->rc->amacube->feedback[] = array('type' => 'confirmation', 'message' => 'config_saved');
+        if ($this->amacube->driver->verify_policy_array()) {
+            if ($this->amacube->driver->save()) {
+                $this->rc->amacube->feedback[] = array('type' => 'confirmation', 'message' => 'config_saved');
+            } else {
+                $this->rc->amacube->errors[] = "policy_save_failed";
+            }
+        } else {
+            $this->rc->amacube->errors[] = "policy_verification_failed";
         }
 
     }
