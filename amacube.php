@@ -271,6 +271,7 @@ class amacube extends rcube_plugin
             $output_table->add('', $string);
         }
 
+        // Only show the radio buttons if the user can change this settings
         if ($this->amacube->driver->is_supported('banned_lover')) {
             // Create output : table : radios : banned
             $output_table->add('title', $this->gettext('banned_delivery'));
@@ -288,6 +289,7 @@ class amacube extends rcube_plugin
             $output_table->add('', $string);
         }
 
+        // Only show the radio buttons if the user can change this settings
         if ($this->amacube->driver->is_supported('header_lover')) {
             // Create output : table : radios : bad_header
             $output_table->add('title', $this->gettext('bad_header_delivery'));
@@ -336,6 +338,41 @@ class amacube extends rcube_plugin
         // Create output : levels
         $output_levels = $output_fieldset;
 
+        // Create output : table (whitelist)
+        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+
+        if ($this->amacube->driver->is_supported('whitelist_sender')) {
+            $whitelist = $this->amacube->driver->policy_setting['whitelist_sender'];
+
+            if (is_array($whitelist) && count($whitelist) > 0) {
+                $sender_table = new html_table(array('cols' => 1));
+                foreach ($whitelist as $id => $sender) {
+                    $sender_table->add('', $this->_show_inputfield('whitelist_' . $id, $sender));
+                }
+
+                $output_table->add('title', html::label('whitelist', $this->gettext('whitelist_sender')));
+                $output_table->add('', $sender_table->show());
+            }
+        }
+
+        // Create output : fieldset
+        $output_legend   = html::tag('legend', null, $this->gettext('section_whitelist'));
+        $output_fieldset = html::tag('fieldset', array('class' => 'whitelist'), $output_legend . $output_table->show());
+        // Create output : levels
+        $output_whitelist = $output_fieldset;
+
+        // Create output : table (blacklist)
+        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+
+        if ($this->amacube->driver->is_supported('blacklist_sender')) {
+        }
+
+        // Create output : fieldset
+        $output_legend   = html::tag('legend', null, $this->gettext('section_blacklist'));
+        $output_fieldset = html::tag('fieldset', array('class' => 'blacklist'), $output_legend . $output_table->show());
+        // Create output : levels
+        $output_blacklist = $output_fieldset;
+
         // Create output : button
         $output_button = html::div('footerleft formbuttons', $this->rc->output->button(array(
             'command' => 'plugin.amacube-settings-post',
@@ -351,7 +388,7 @@ class amacube extends rcube_plugin
             'class'  => 'propform',
             'method' => 'post',
             'action' => './?_task=settings&_action=plugin.amacube-settings',
-        ), $output_checks . $output_delivery . $output_levels));
+        ), $output_checks . $output_delivery . $output_levels . $output_whitelist . $output_blacklist));
 
         // Add labels to client
         $this->rc->output->add_label(
