@@ -365,6 +365,17 @@ class amacube extends rcube_plugin
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
 
         if ($this->amacube->driver->is_supported('blacklist_sender')) {
+            $blacklist = $this->amacube->driver->policy_setting['blacklist_sender'];
+
+            if (is_array($blacklist) && count($blacklist) > 0) {
+                $sender_table = new html_table(array('cols' => 1));
+                foreach ($blacklist as $id => $sender) {
+                    $sender_table->add('', $this->_show_inputfield('whitelist_' . $id, $sender));
+                }
+
+                $output_table->add('title', html::label('blacklist', $this->gettext('blacklist_sender')));
+                $output_table->add('', $sender_table->show());
+            }
         }
 
         // Create output : fieldset
