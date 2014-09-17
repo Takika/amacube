@@ -539,14 +539,15 @@ class amacube extends rcube_plugin
         }
 
         // Verify policy config
-        if ($this->amacube->driver->verify_policy_array()) {
+        $verify = $this->amacube->driver->verify_policy_array();
+        if (isset($verify) && is_array($verify) && !empty($verify)) {
+            $this->rc->amacube->errors[] = "policy_verification_failed";
+        } else {
             if ($this->amacube->driver->save()) {
                 $this->rc->amacube->feedback[] = array('type' => 'confirmation', 'message' => 'config_saved');
             } else {
                 $this->rc->amacube->errors[] = "policy_save_failed";
             }
-        } else {
-            $this->rc->amacube->errors[] = "policy_verification_failed";
         }
 
     }
