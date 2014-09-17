@@ -73,7 +73,7 @@ abstract class amacube_driver
     /*
      * Save the policy to the backend
      */
-    abstract function save()
+    abstract function save();
 
     // Convenience methods
     abstract function is_active($type);
