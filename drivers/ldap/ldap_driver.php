@@ -70,9 +70,8 @@ class ldap_driver extends amacube_driver
 
         $verify = $this->verify_policy_array();
         if (isset($verify) && is_array($verify)) {
-            // TODO: something is dead wrong, database settngs do not verify
-            // FiXME: throw error
-            error_log("AMACUBE: verification of database settings failed..." . implode(',', $verify));
+            $this->rc->amacube->errors("Verification of LDAP settings failed.");
+            write_log('amacube', sprintf("Verification of LDAP settings failed: %s", implode(',', $verify)));
         }
     }
 
@@ -84,6 +83,7 @@ class ldap_driver extends amacube_driver
             if ($this->initialized = $this->ldap->connect()) {
                 $dn = $this->rc->config->get('amacube_ldap_binddn');
                 $pw = $this->rc->config->get('amacube_ldap_bindpw');
+
                 $this->initialized = $this->ldap->bind($dn, $pw);
                 $this->ldap->set_debug(true);
             }
@@ -107,9 +107,9 @@ class ldap_driver extends amacube_driver
             $user = $userdata['username'];
         }
 
-        $filter   = sprintf("(&(objectClass=amavisAccount)(cn=%s))", $user);
-        $attrs    = array_merge($this->config['attributes'], array_values($this->amavis_mappings));
-        $results  = $this->ldap->search($base, $filter, 'sub', $attrs);
+        $filter  = sprintf("(&(objectClass=amavisAccount)(cn=%s))", $user);
+        $attrs   = array_merge($this->config['attributes'], array_values($this->amavis_mappings));
+        $results = $this->ldap->search($base, $filter, 'sub', $attrs);
 
         if ($results->count() == 1) {
             $entries = $results->entries(true);
@@ -118,6 +118,7 @@ class ldap_driver extends amacube_driver
                     if (array_key_exists($key, $this->amavis_mappings)) {
                         $ldap_key  = strtolower($this->amavis_mappings[$key]);
                         $new_value = array_key_exists($ldap_key, $entry) ? $entry[$ldap_key] : $this->policy_setting[$key];
+
                         $this->policy_setting[$key] = $this->get_value($key, $new_value);
                     }
                 }
@@ -185,7 +186,7 @@ class ldap_driver extends amacube_driver
         return $ret;
     }
 
-    public function is_delivery($type,$method)
+    public function is_delivery($type, $method)
     {
         if ($type == 'banned') {
             $lover = $type . '_files_lover';
