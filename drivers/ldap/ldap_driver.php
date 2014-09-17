@@ -210,7 +210,7 @@ class ldap_driver extends amacube_driver
 
     public function is_supported($setting)
     {
-        return array_key_exists($settings, $this->amavis_mappings);
+        return array_key_exists($setting, $this->amavis_mappings);
     }
 
 }
