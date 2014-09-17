@@ -347,7 +347,13 @@ class amacube extends rcube_plugin
             if (is_array($whitelist) && count($whitelist) > 0) {
                 $sender_table = new html_table(array('cols' => 1));
                 foreach ($whitelist as $id => $sender) {
-                    $sender_table->add('', $this->_show_inputfield('whitelist_' . $id, $sender));
+                    $sender_input = new html_inputfield(array(
+                        'name'  => 'whitelist_sender[]',
+                        'id'    => 'whitelist_' . $id,
+                        'value' => $sender,
+                        'size'  => 20
+                    ));
+                    $sender_table->add('', $sender_input->show());
                 }
 
                 $output_table->add('title', html::label('whitelist', $this->gettext('whitelist_sender')));
@@ -370,7 +376,13 @@ class amacube extends rcube_plugin
             if (is_array($blacklist) && count($blacklist) > 0) {
                 $sender_table = new html_table(array('cols' => 1));
                 foreach ($blacklist as $id => $sender) {
-                    $sender_table->add('', $this->_show_inputfield('whitelist_' . $id, $sender));
+                    $sender_input = new html_inputfield(array(
+                        'name'  => 'blacklist_sender[]',
+                        'id'    => 'blacklist_' . $id,
+                        'value' => $sender,
+                        'size'  => 20
+                    ));
+                    $sender_table->add('', $sender_input->show());
                 }
 
                 $output_table->add('title', html::label('blacklist', $this->gettext('blacklist_sender')));
