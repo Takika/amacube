@@ -357,7 +357,7 @@ class amacube extends rcube_plugin
         $output .= html::div(array('id' => 'preferences-details', 'class' => 'boxcontent'), $this->rc->output->form_tag(array(
             'id'     => 'amacubeform',
             'name'   => 'amacubeform',
-            'class'  => 'propform',
+            'class'  => 'tabbed',
             'method' => 'post',
             'action' => './?_task=settings&_action=plugin.amacube-settings',
         ), $output_html));
