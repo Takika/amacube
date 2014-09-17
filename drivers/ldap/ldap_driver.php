@@ -166,6 +166,10 @@ class ldap_driver extends amacube_driver
 
     }
 
+    public function save()
+    {
+    }
+
     public function is_active($type)
     {
 		if ($type == 'virus' || $type == 'spam') {

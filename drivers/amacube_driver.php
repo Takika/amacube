@@ -70,6 +70,11 @@ abstract class amacube_driver
      */
     abstract function get_value($key, $value);
 
+    /*
+     * Save the policy to the backend
+     */
+    abstract function save()
+
     // Convenience methods
     abstract function is_active($type);
     abstract function is_delivery($type, $method);
@@ -193,6 +198,7 @@ abstract class amacube_driver
             return $errors;
         }
     }
+
 
 }
 
