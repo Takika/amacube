@@ -167,6 +167,7 @@ class ldap_driver extends amacube_driver
 
     public function save()
     {
+        return true;
     }
 
     public function is_active($type)
