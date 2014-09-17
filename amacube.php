@@ -288,6 +288,9 @@ class amacube extends rcube_plugin
 
         // Create output : table (levels)
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+        // Create output : table : input : sa_tag_level
+        $output_table->add('title', html::label('spam_tag_level', $this->gettext('spam_tag_level')));
+        $output_table->add('', $this->_show_inputfield('spam_tag_level', $this->amacube->driver->policy_setting['spam_tag_level']));
         // Create output : table : input : sa_tag2_level
         $output_table->add('title', html::label('spam_tag2_level', $this->gettext('spam_tag2_level')));
         $output_table->add('', $this->_show_inputfield('spam_tag2_level', $this->amacube->driver->policy_setting['spam_tag2_level']));
