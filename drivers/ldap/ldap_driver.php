@@ -129,24 +129,6 @@ class ldap_driver extends amacube_driver
         }
     }
 
-    public function get_policy()
-    {
-        return $this->policy_setting;
-    }
-
-    // manually set amavis settings, either from config or from POST request
-    public function set_policy($array)
-    {
-        // verify the array is correct
-        $error = $this->verify_policy_array($array);
-        if (!empty($error)) {
-            return $error;
-        }
-
-        // and set write to instance variable
-        $this->policy_setting = $array;
-    }
-
     public function get_value($key, $value)
     {
         $retval = null;
@@ -168,46 +150,6 @@ class ldap_driver extends amacube_driver
     public function save()
     {
         return true;
-    }
-
-    public function is_active($type)
-    {
-        $types = array(
-            'virus',
-            'spam',
-            'banned',
-            'header'
-        );
-
-        $ret = false;
-        if (in_array($type, $types)) {
-            $ret = !$this->policy_setting['bypass_' . $type . '_checks'];
-        }
-
-        return $ret;
-    }
-
-    public function is_delivery($type, $method)
-    {
-        if ($type == 'banned') {
-            $lover = $type . '_files_lover';
-        } else {
-            $lover = $type . '_lover';
-        }
-
-        if ($method == 'deliver' && $this->policy_setting[$lover]) {
-            return true;
-        }
-
-        if ($method == 'quarantine' && !$this->policy_setting[$lover] && $this->policy_setting[$type . '_quarantine_to']) {
-            return true;
-        }
-
-        if ($method == 'discard' && !$this->policy_setting[$lover] && !$this->policy_setting[$type . '_quarantine_to']) {
-            return true;
-        }
-
-        return false;
     }
 
     public function is_supported($setting)

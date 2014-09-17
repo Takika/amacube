@@ -56,16 +56,6 @@ abstract class amacube_driver
     );
 
     /*
-     * Get policy from backend
-     */
-    abstract function get_policy();
-
-    /*
-     * Set policy in backend
-     */
-    abstract function set_policy($policy);
-
-    /*
      * Map values from backend
      */
     abstract function get_value($key, $value);
@@ -76,8 +66,46 @@ abstract class amacube_driver
     abstract function save();
 
     // Convenience methods
-    abstract function is_active($type);
-    abstract function is_delivery($type, $method);
+    function is_active($type)
+    {
+        $types = array(
+            'virus',
+            'spam',
+            'banned',
+            'header'
+        );
+
+        $ret = false;
+        if (in_array($type, $types)) {
+            $ret = !$this->policy_setting['bypass_' . $type . '_checks'];
+        }
+
+        return $ret;
+    }
+
+    function is_delivery($type, $method)
+    {
+        if ($type == 'banned') {
+            $lover = $type . '_files_lover';
+        } else {
+            $lover = $type . '_lover';
+        }
+
+        if ($method == 'deliver' && $this->policy_setting[$lover]) {
+            return true;
+        }
+
+        if ($method == 'quarantine' && !$this->policy_setting[$lover] && $this->policy_setting[$type . '_quarantine_to']) {
+            return true;
+        }
+
+        if ($method == 'discard' && !$this->policy_setting[$lover] && !$this->policy_setting[$type . '_quarantine_to']) {
+            return true;
+        }
+
+        return false;
+    }
+
     abstract function is_supported($setting);
 
     // set the checkbox checked mark if user is a NOT spam or virus lover
@@ -95,7 +123,6 @@ abstract class amacube_driver
 
         return $ret;
     }
-
 
     // method to verify the policy settings are correct
     function verify_policy_array($array = null)
@@ -199,8 +226,6 @@ abstract class amacube_driver
             return $errors;
         }
     }
-
-
 }
 
 ?>
