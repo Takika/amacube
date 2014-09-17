@@ -194,125 +194,81 @@ class amacube extends rcube_plugin
         }
 
         // Create output
-        $output = '';
+        $output_html = "";
+        $output = "";
         // Add header to output
         $output .= html::tag('h1', array('class' => 'boxtitle'), Q($this->gettext('filter_settings_pagetitle')));
 
-        // Create output : table (checks)
-        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+        $checks = array(
+            'spam'   => false,
+            'virus'  => false,
+            'banned' => false,
+            'header' => false,
+        );
 
-        // Create output : table : checkbox : spam check
-        if ($this->amacube->driver->is_supported('bypass_spam_checks')) {
-            $output_table->add('title', html::label('activate_spam_check', $this->gettext('spam_check')));
-            $output_table->add('', $this->_show_checkbox('activate_spam_check', $this->amacube->driver->is_active('spam')));
+        foreach (array_keys($checks) as $check) {
+            $checks[$check] = $this->amacube->driver->is_supported('bypass_' . $check . '_checks');
         }
 
-        // Create output : table : checkbox : virus check
-        if ($this->amacube->driver->is_supported('bypass_virus_checks')) {
-            $output_table->add('title', html::label('activate_virus_check', $this->gettext('virus_check')));
-            $output_table->add('', $this->_show_checkbox('activate_virus_check', $this->amacube->driver->is_active('virus')));
-        }
+        $checks = array_filter($checks);
+        if (count($checks)) {
+            // Create output : table (checks)
+            $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
 
-        // Create output : table : checkbox : banned check
-        if ($this->amacube->driver->is_supported('bypass_banned_checks')) {
-            $output_table->add('title', html::label('activate_banned_check', $this->gettext('banned_check')));
-            $output_table->add('', $this->_show_checkbox('activate_banned_check', $this->amacube->driver->is_active('banned')));
-        }
-
-        // Create output : table : checkbox : header check
-        if ($this->amacube->driver->is_supported('bypass_header_checks')) {
-            $output_table->add('title', html::label('activate_header_check', $this->gettext('header_check')));
-            $output_table->add('', $this->_show_checkbox('activate_header_check', $this->amacube->driver->is_active('header')));
-        }
-
-        // Create output : fieldset
-        $output_legend   = html::tag('legend', null, $this->gettext('section_checks'));
-        $output_fieldset = html::tag('fieldset', array('class' => 'checks'), $output_legend . $output_table->show());
-
-        // Create output : activate
-        $output_checks = $output_fieldset;
-
-        // Create output : table (delivery)
-        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
-
-        // Only show the radio buttons if the user can change this settings
-        if ($this->amacube->driver->is_supported('spam_lover')) {
-            // Create output : table : radios : spam
-            $output_table->add('title', $this->gettext('spam_delivery'));
-            $string  = '';
-            $string .= $this->_show_radio('spam_delivery_deliver', 'spam_delivery', 'deliver', $this->amacube->driver->is_delivery('spam', 'deliver')) . ' ';
-            $string .= html::label('spam_delivery_deliver', $this->gettext('deliver'));
-
-            if ($this->rc->config->get('amacube_quarantine_enabled')) {
-                $string .= $this->_show_radio('spam_delivery_quarantine', 'spam_delivery', 'quarantine', $this->amacube->driver->is_delivery('spam', 'quarantine')) . ' ';
-                $string .= html::label('spam_delivery_quarantine', $this->gettext('quarantine'));
+            // Create output : table : checkboxes
+            foreach (array_keys($checks) as $check) {
+                $output_table->add('title', html::label('activate_' . $check . '_check', $this->gettext($check . '_check')));
+                $output_table->add('', $this->_show_checkbox('activate_' . $check . '_check', $this->amacube->driver->is_active($check)));
             }
 
-            $string .= $this->_show_radio('spam_delivery_discard', 'spam_delivery', 'discard', $this->amacube->driver->is_delivery('spam', 'discard'));
-            $string .= html::label('spam_delivery_discard', $this->gettext('discard'));
-            $output_table->add('', $string);
+            // Create output : fieldset
+            $output_legend   = html::tag('legend', null, $this->gettext('section_checks'));
+            $output_fieldset = html::tag('fieldset', array('class' => 'checks'), $output_legend . $output_table->show());
+
+            // Create output : activate
+            $output_html .= $output_fieldset;
         }
 
-        // Only show the radio buttons if the user can change this settings
-        if ($this->amacube->driver->is_supported('virus_lover')) {
-            // Create output : table : radios : virus
-            $output_table->add('title', $this->gettext('virus_delivery'));
-            $string  = '';
-            $string .= $this->_show_radio('virus_delivery_deliver', 'virus_delivery', 'deliver', $this->amacube->driver->is_delivery('virus', 'deliver')) . ' ';
-            $string .= html::label('virus_delivery_deliver', $this->gettext('deliver'));
+        $lovers = array(
+            'spam'   => false,
+            'virus'  => false,
+            'banned' => false,
+            'header' => false,
+        );
 
-            if ($this->rc->config->get('amacube_quarantine_enabled')) {
-                $string .= $this->_show_radio('virus_delivery_quarantine', 'virus_delivery', 'quarantine', $this->amacube->driver->is_delivery('virus', 'quarantine')) . ' ';
-                $string .= html::label('virus_delivery_quarantine', $this->gettext('quarantine'));
+        foreach (array_keys($lovers) as $lover) {
+            $lovers[$lover] = $this->amacube->driver->is_supported($lover . '_lover');
+        }
+
+        $lovers = array_filter($lovers);
+
+        if (count($lovers)) {
+            // Create output : table (delivery)
+            $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+
+            // Create output : table : radios
+            foreach (array_keys($lovers) as $lover) {
+                $output_table->add('title', $this->gettext($lover . '_delivery'));
+                $string  = $this->_show_radio($lover . '_delivery_deliver', $lover . '_delivery', 'deliver', $this->amacube->driver->is_delivery($lover, 'deliver')) . ' ';
+                $string .= html::label($lover . '_delivery_deliver', $this->gettext('deliver'));
+
+                if ($this->rc->config->get('amacube_quarantine_enabled')) {
+                    $string .= $this->_show_radio($lover . '_delivery_quarantine', $lover . '_delivery', 'quarantine', $this->amacube->driver->is_delivery($lover, 'quarantine')) . ' ';
+                    $string .= html::label($lover . '_delivery_quarantine', $this->gettext('quarantine'));
+                }
+
+                $string .= $this->_show_radio($lover . '_delivery_discard', $lover . '_delivery', 'discard', $this->amacube->driver->is_delivery($lover, 'discard'));
+                $string .= html::label($lover . '_delivery_discard', $this->gettext('discard'));
+                $output_table->add('', $string);
             }
 
-            $string .= $this->_show_radio('virus_delivery_discard', 'virus_delivery', 'discard', $this->amacube->driver->is_delivery('virus', 'discard'));
-            $string .= html::label('virus_delivery_discard', $this->gettext('discard'));
-            $output_table->add('', $string);
+            // Create output : fieldset
+            $output_legend   = html::tag('legend', null, $this->gettext('section_delivery'));
+            $output_fieldset = html::tag('fieldset', array('class' => 'delivery'), $output_legend . $output_table->show());
+
+            // Create output : quarantine
+            $output_html .= $output_fieldset;
         }
-
-        // Only show the radio buttons if the user can change this settings
-        if ($this->amacube->driver->is_supported('banned_lover')) {
-            // Create output : table : radios : banned
-            $output_table->add('title', $this->gettext('banned_delivery'));
-            $string  = '';
-            $string .= $this->_show_radio('banned_delivery_deliver', 'banned_delivery', 'deliver', $this->amacube->driver->is_delivery('banned', 'deliver')) . ' ';
-            $string .= html::label('banned_delivery_deliver', $this->gettext('deliver'));
-
-            if ($this->rc->config->get('amacube_quarantine_enabled')) {
-                $string .= $this->_show_radio('banned_delivery_quarantine', 'banned_delivery', 'quarantine', $this->amacube->driver->is_delivery('banned', 'quarantine')) . ' ';
-                $string .= html::label('banned_delivery_quarantine', $this->gettext('quarantine'));
-            }
-
-            $string .= $this->_show_radio('banned_delivery_discard', 'banned_delivery', 'discard', $this->amacube->driver->is_delivery('banned', 'discard'));
-            $string .= html::label('banned_delivery_discard', $this->gettext('discard'));
-            $output_table->add('', $string);
-        }
-
-        // Only show the radio buttons if the user can change this settings
-        if ($this->amacube->driver->is_supported('header_lover')) {
-            // Create output : table : radios : bad_header
-            $output_table->add('title', $this->gettext('bad_header_delivery'));
-            $string  = '';
-            $string .= $this->_show_radio('badheader_delivery_deliver', 'badheader_delivery', 'deliver', $this->amacube->driver->is_delivery('bad_header', 'deliver')) . ' ';
-            $string .= html::label('badheader_delivery_deliver', $this->gettext('deliver'));
-
-            if ($this->rc->config->get('amacube_quarantine_enabled')) {
-                $string .= $this->_show_radio('badheader_delivery_quarantine', 'badheader_delivery', 'quarantine', $this->amacube->driver->is_delivery('bad_header', 'quarantine')) . ' ';
-                $string .= html::label('badheader_delivery_quarantine', $this->gettext('quarantine'));
-            }
-
-            $string .= $this->_show_radio('badheader_delivery_discard', 'badheader_delivery', 'discard', $this->amacube->driver->is_delivery('bad_header', 'discard'));
-            $string .= html::label('badheader_delivery_discard', $this->gettext('discard'));
-            $output_table->add('', $string);
-        }
-
-        // Create output : fieldset
-        $output_legend   = html::tag('legend', null, $this->gettext('section_delivery'));
-        $output_fieldset = html::tag('fieldset', array('class' => 'delivery'), $output_legend . $output_table->show());
-
-        // Create output : quarantine
-        $output_delivery = $output_fieldset;
 
         // Create output : table (levels)
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
@@ -336,65 +292,48 @@ class amacube extends rcube_plugin
         $output_legend   = html::tag('legend', null, $this->gettext('section_levels'));
         $output_fieldset = html::tag('fieldset', array('class' => 'levels'), $output_legend . $output_table->show());
         // Create output : levels
-        $output_levels = $output_fieldset;
+        $output_html = $output_fieldset;
 
-        // Create output : table (whitelist)
-        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+        $senders = array(
+            'whitelist' => false,
+            'blacklist' => false,
+        );
 
-        if ($this->amacube->driver->is_supported('whitelist_sender')) {
-            $whitelist = $this->amacube->driver->policy_setting['whitelist_sender'];
-
-            if (is_array($whitelist) && count($whitelist) > 0) {
-                $sender_table = new html_table(array('cols' => 1));
-                foreach ($whitelist as $id => $sender) {
-                    $sender_input = new html_inputfield(array(
-                        'name'  => 'whitelist_sender[]',
-                        'id'    => 'whitelist_' . $id,
-                        'value' => $sender,
-                        'size'  => 20
-                    ));
-                    $sender_table->add('', $sender_input->show());
-                }
-
-                $output_table->add('title', html::label('whitelist', $this->gettext('whitelist_sender')));
-                $output_table->add('', $sender_table->show());
-            }
+        foreach (array_keys($senders) as $sender) {
+            $senders[$sender] = $this->amacube->driver->is_supported($sender . '_sender');
         }
 
-        // Create output : fieldset
-        $output_legend   = html::tag('legend', null, $this->gettext('section_whitelist'));
-        $output_fieldset = html::tag('fieldset', array('class' => 'whitelist'), $output_legend . $output_table->show());
-        // Create output : levels
-        $output_whitelist = $output_fieldset;
+        $senders = array_filter($senders);
 
-        // Create output : table (blacklist)
-        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+        if (count($senders)) {
+            foreach (array_keys($senders) as $sender) {
+                // Create output : table
+                $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
 
-        if ($this->amacube->driver->is_supported('blacklist_sender')) {
-            $blacklist = $this->amacube->driver->policy_setting['blacklist_sender'];
+                $list = $this->amacube->driver->policy_setting[$sender . '_sender'];
+                if (is_array($list) && count($list) > 0) {
+                    $sender_table = new html_table(array('cols' => 1));
+                    foreach ($list as $id => $value) {
+                        $sender_input = new html_inputfield(array(
+                            'name'  => $sender . '_sender[]',
+                            'id'    => $sender . '_' . $id,
+                            'value' => $value,
+                            'size'  => 20,
+                        ));
+                        $sender_table->add('', $sender_input->show());
+                    }
 
-            if (is_array($blacklist) && count($blacklist) > 0) {
-                $sender_table = new html_table(array('cols' => 1));
-                foreach ($blacklist as $id => $sender) {
-                    $sender_input = new html_inputfield(array(
-                        'name'  => 'blacklist_sender[]',
-                        'id'    => 'blacklist_' . $id,
-                        'value' => $sender,
-                        'size'  => 20
-                    ));
-                    $sender_table->add('', $sender_input->show());
+                    $output_table->add('title', html::label($sender, $this->gettext($sender . '_sender')));
+                    $output_table->add('', $sender_table->show());
                 }
 
-                $output_table->add('title', html::label('blacklist', $this->gettext('blacklist_sender')));
-                $output_table->add('', $sender_table->show());
+                // Create output : fieldset
+                $output_legend   = html::tag('legend', null, $this->gettext('section_' . $sender));
+                $output_fieldset = html::tag('fieldset', array('class' => $sender), $output_legend . $output_table->show());
+                // Create output : levels
+                $output_html .= $output_fieldset;
             }
         }
-
-        // Create output : fieldset
-        $output_legend   = html::tag('legend', null, $this->gettext('section_blacklist'));
-        $output_fieldset = html::tag('fieldset', array('class' => 'blacklist'), $output_legend . $output_table->show());
-        // Create output : levels
-        $output_blacklist = $output_fieldset;
 
         // Create output : button
         $output_button = html::div('footerleft formbuttons', $this->rc->output->button(array(
@@ -411,7 +350,7 @@ class amacube extends rcube_plugin
             'class'  => 'propform',
             'method' => 'post',
             'action' => './?_task=settings&_action=plugin.amacube-settings',
-        ), $output_checks . $output_delivery . $output_levels . $output_whitelist . $output_blacklist));
+        ), $output_html));
 
         // Add labels to client
         $this->rc->output->add_label(
