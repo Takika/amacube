@@ -149,6 +149,10 @@ class ldap_driver extends amacube_driver
 
     public function save()
     {
+        if (!$this->initialized) {
+            return false;
+        }
+
         return true;
     }
 
