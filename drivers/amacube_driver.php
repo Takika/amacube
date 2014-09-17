@@ -53,6 +53,19 @@ abstract class amacube_driver
             'bypass_banned_checks',
             'bypass_header_checks',
             'spam_modifies_subj',
+            'virus_quarantine_to',
+            'spam_quarantine_to',
+            'banned_quarantine_to',
+    );
+
+    protected $numeric_settings = array(
+        'spam_tag_level',
+        'spam_tag2_level',
+        'spam_tag3_level',
+        'spam_kill_level',
+        'spam_dsn_cutoff_level',
+        'spam_quarantine_cutoff_level',
+        
     );
 
     /*
@@ -136,81 +149,16 @@ abstract class amacube_driver
         }
 
         // check the booleans:
-        if (is_bool($array['virus_lover']) === false) {
-            array_push($errors, 'virus_lover');
+        foreach ($this->boolean_settings as $var) {
+            if (is_bool($array[$var]) === false) {
+                array_push($errors, $var);
+            }
         }
 
-        if (is_bool($array['spam_lover']) === false) {
-            array_push($errors, 'spam_lover');
-        }
-
-        if (is_bool($array['unchecked_lover']) === false) {
-            array_push($errors, 'unchecked_lover');
-        }
-
-        if (is_bool($array['banned_files_lover']) === false) {
-            array_push($errors, 'banned_files_lover');
-        }
-
-        if (is_bool($array['bad_header_lover']) === false) {
-            array_push($errors, 'bad_header_lover');
-        }
-
-        if (is_bool($array['bypass_virus_checks']) === false) {
-            array_push($errors, 'bypass_virus_checks');
-        }
-
-        if (is_bool($array['bypass_spam_checks']) === false) {
-            array_push($errors, 'bypass_spam_checks');
-        }
-
-        if (is_bool($array['bypass_banned_checks']) === false) {
-            array_push($errors, 'bypass_banned_checks');
-        }
-
-        if (is_bool($array['bypass_header_checks']) === false) {
-            array_push($errors, 'bypass_header_checks');
-        }
-
-        if (is_bool($array['spam_modifies_subj']) === false) {
-            array_push($errors, 'spam_modifies_subj');
-        }
-
-        // check the floats:
-        if (is_numeric($array['spam_tag_level']) === false) {
-            array_push($errors, 'spam_tag_level:' . $array['spam_tag_level'] . "___" . gettype($array['spam_tag_level']));
-        }
-
-        if (is_numeric($array['spam_tag2_level']) === false) {
-            array_push($errors, 'spam_tag2_level');
-        }
-
-        if (is_numeric($array['spam_tag3_level']) === false) {
-            array_push($errors, 'spam_tag3_level');
-        }
-
-        if (is_numeric($array['spam_kill_level']) === false) {
-            array_push($errors, 'spam_kill_level');
-        }
-
-        if (is_numeric($array['spam_dsn_cutoff_level']) === false) {
-            array_push($errors, 'spam_dsn_cutoff_level');
-        }
-
-        if (is_numeric($array['spam_quarantine_cutoff_level']) === false) {
-            array_push($errors, 'spam_quarantine_cutoff_level');
-        }
-
-        if (is_bool($array['virus_quarantine_to']) === false) {
-            array_push($errors, 'virus_quarantine_to');
-        }
-
-        if (is_bool($array['spam_quarantine_to']) === false) {
-            array_push($errors, 'spam_quarantine_to');
-        }
-
-        if (is_bool($array['banned_quarantine_to']) === false) {
-            array_push($errors, 'banned_quarantine_to');
+        foreach ($this->numeric_settings as $var) {
+            if (is_numeric($array[$var]) === false) {
+                array_push($errors, $var .. ": " . $array[$var] . "___" . gettype($array[$var]));
+            }
         }
 
         // make sure the array does not contain any other keys
