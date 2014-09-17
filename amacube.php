@@ -441,26 +441,22 @@ class amacube extends rcube_plugin
     function settings_post()
     {
         // Get the checks post vars
-        $activate_spam_check  = get_input_value('activate_spam_check', RCUBE_INPUT_POST, false);
-        $activate_virus_check = get_input_value('activate_virus_check', RCUBE_INPUT_POST, false);
-
-        // Get the levels post vars
-        $spam_tag2_level = get_input_value('spam_tag2_level', RCUBE_INPUT_POST, false);
-        $spam_kill_level = get_input_value('spam_kill_level', RCUBE_INPUT_POST, false);
-
-        $spam_quarantine_cutoff_level = get_input_value('spam_quarantine_cutoff_level', RCUBE_INPUT_POST, false);
-
-        // Apply the checks post vars
-        if (!empty($activate_spam_check)) {
-            $this->amacube->driver->policy_setting['bypass_spam_checks'] = false;
-        } else {
-            $this->amacube->driver->policy_setting['bypass_spam_checks'] = true;
+        if ($this->amacube->driver->is_supported('bypass_spam_checks')) {
+            $activate_spam_check  = get_input_value('activate_spam_check', RCUBE_INPUT_POST, false);
+            $this->amacube->driver->policy_setting['bypass_spam_checks'] = empty($activate_spam_check);
         }
 
-        if (!empty($activate_virus_check)) {
-            $this->amacube->driver->policy_setting['bypass_virus_checks'] = false;
-        } else {
-            $this->amacube->driver->policy_setting['bypass_virus_checks'] = true;
+        if ($this->amacube->driver->is_supported('bypass_virus_checks')) {
+            $activate_virus_check = get_input_value('activate_virus_check', RCUBE_INPUT_POST, false);
+            $this->amacube_driver->policy_settings['bypass_virus_checks'] = empty($activate_virus_check);
+        }
+        if ($this->amacube->driver->is_supported('bypass_banned_checks')) {
+            $activate_banned_check = get_input_value('activate_banned_check', RCUBE_INPUT_POST, false);
+            $this->amacube_driver->policy_settings['bypass_banned_checks'] = empty($activate_banned_check);
+        }
+        if ($this->amacube->driver->is_supported('bypass_header_checks')) {
+            $activate_header_check = get_input_value('activate_header_check', RCUBE_INPUT_POST, false);
+            $this->amacube_driver->policy_settings['bypass_header_checks'] = empty($activate_header_check);
         }
 
         // Apply the delivery post vars
@@ -496,23 +492,50 @@ class amacube extends rcube_plugin
             }
         }
 
+        // Get the levels post vars
+        $spam_tag_level  = get_input_value('spam_tag_level', RCUBE_INPUT_POST, false);
+        $spam_tag2_level = get_input_value('spam_tag2_level', RCUBE_INPUT_POST, false);
+        $spam_kill_level = get_input_value('spam_kill_level', RCUBE_INPUT_POST, false);
+
         // Apply the levels post vars
-        if (!is_numeric($spam_tag2_level) || $spam_tag2_level < -20 || $spam_tag2_level > 20) {
+        $tag_level_min = $this->rc->config->get('amacube_amavis_tag_level_min');
+        $tag_level_max = $this->rc->config->get('amacube_amavis_tag_level_max');
+        if (!is_numeric($spam_tag_level) || $spam_tag_level < $tag_level_min || $spam_tag_level > $tag_level_max) {
+            $this->rc->amacube->errors[] = 'spam_tag_level_error';
+        } else {
+            $this->amacube->driver->policy_setting['spam_tag_level'] = $spam_tag2_level;
+        }
+
+        if (!is_numeric($spam_tag2_level) || $spam_tag2_level < $tag_level_min || $spam_tag2_level > $tag_level_max) {
             $this->rc->amacube->errors[] = 'spam_tag2_level_error';
         } else {
             $this->amacube->driver->policy_setting['spam_tag2_level'] = $spam_tag2_level;
         }
 
-        if (!is_numeric($spam_kill_level) || $spam_kill_level < -20 || $spam_kill_level > 20) {
+        if (!is_numeric($spam_kill_level) || $spam_kill_level < $tag_level_min || $spam_kill_level > $tag_level_max) {
             $this->rc->amacube->errors[] = 'spam_kill_level_error';
         } else {
             $this->amacube->driver->policy_setting['spam_kill_level'] = $spam_kill_level;
         }
 
-        if (!is_numeric($spam_quarantine_cutoff_level) || $spam_quarantine_cutoff_level < $this->amacube->driver->policy_setting['spam_kill_level'] || $spam_kill_level > 1000) {
-            $this->rc->amacube->errors[] = 'spam_quarantine_cutoff_level_error';
-        } else {
-            $this->amacube->driver->policy_setting['spam_quarantine_cutoff_level'] = $spam_quarantine_cutoff_level;
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            $spam_quarantine_cutoff_level = get_input_value('spam_quarantine_cutoff_level', RCUBE_INPUT_POST, false);
+
+            if (!is_numeric($spam_quarantine_cutoff_level) || $spam_quarantine_cutoff_level < $this->amacube->driver->policy_setting['spam_kill_level'] || $spam_kill_level > 1000) {
+                $this->rc->amacube->errors[] = 'spam_quarantine_cutoff_level_error';
+            } else {
+                $this->amacube->driver->policy_setting['spam_quarantine_cutoff_level'] = $spam_quarantine_cutoff_level;
+            }
+        }
+
+        if ($this->amacube->driver->is_supported('blacklist_sender')) {
+            $whitelist_sender = get_input_value('whitelist_sender', RCUBE_INPUT_POST, false);
+            write_log('amacube', sprintf("whitelist_sender: %s", var_export($whitelist_sender, true)));
+        }
+
+        if ($this->amacube->driver->is_supported('blacklist_sender')) {
+            $blacklist_sender = get_input_value('blacklist_sender', RCUBE_INPUT_POST, false);
+            write_log('amacube', sprintf("blacklist_sender: %s", var_export($blacklist_sender, true)));
         }
 
         // Verify policy config
