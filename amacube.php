@@ -202,12 +202,28 @@ class amacube extends rcube_plugin
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
 
         // Create output : table : checkbox : spam check
-        $output_table->add('title', html::label('activate_spam_check', $this->gettext('spam_check')));
-        $output_table->add('', $this->_show_checkbox('activate_spam_check', $this->amacube->driver->is_active('spam')));
+        if ($this->amacube->driver->is_supported('bypass_spam_checks')) {
+            $output_table->add('title', html::label('activate_spam_check', $this->gettext('spam_check')));
+            $output_table->add('', $this->_show_checkbox('activate_spam_check', $this->amacube->driver->is_active('spam')));
+        }
 
         // Create output : table : checkbox : virus check
-        $output_table->add('title', html::label('activate_virus_check', $this->gettext('virus_check')));
-        $output_table->add('', $this->_show_checkbox('activate_virus_check', $this->amacube->driver->is_active('virus')));
+        if ($this->amacube->driver->is_supported('bypass_virus_checks')) {
+            $output_table->add('title', html::label('activate_virus_check', $this->gettext('virus_check')));
+            $output_table->add('', $this->_show_checkbox('activate_virus_check', $this->amacube->driver->is_active('virus')));
+        }
+
+        // Create output : table : checkbox : banned check
+        if ($this->amacube->driver->is_supported('bypass_banned_checks')) {
+            $output_table->add('title', html::label('activate_banned_check', $this->gettext('banned_check')));
+            $output_table->add('', $this->_show_checkbox('activate_banned_check', $this->amacube->driver->is_active('banned')));
+        }
+
+        // Create output : table : checkbox : header check
+        if ($this->amacube->driver->is_supported('bypass_header_checks')) {
+            $output_table->add('title', html::label('activate_header_check', $this->gettext('header_check')));
+            $output_table->add('', $this->_show_checkbox('activate_header_check', $this->amacube->driver->is_active('header')));
+        }
 
         // Create output : fieldset
         $output_legend   = html::tag('legend', null, $this->gettext('section_checks'));
