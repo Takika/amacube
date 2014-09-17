@@ -78,6 +78,7 @@ abstract class amacube_driver
     // Convenience methods
     abstract function is_active($type);
     abstract function is_delivery($type, $method);
+    abstract function is_supported($setting);
 
     // set the checkbox checked mark if user is a NOT spam or virus lover
     // (the checkbox marks ACTIVATION of the check, DEACTIVATION means user is a *_lover)

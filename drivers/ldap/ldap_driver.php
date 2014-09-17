@@ -124,7 +124,6 @@ class ldap_driver extends amacube_driver
 
                 $this->policy_pk = $dn;
                 $this->user_pk   = $dn;
-                
             }
         }
     }
@@ -171,11 +170,19 @@ class ldap_driver extends amacube_driver
 
     public function is_active($type)
     {
-		if ($type == 'virus' || $type == 'spam') {
-			return !$this->policy_setting['bypass_' . $type . '_checks'];
-		}
+        $types = array(
+            'virus',
+            'spam',
+            'banned',
+            'header'
+        );
 
-		return false;
+        $ret = false;
+        if (in_array($type, $types)) {
+            $ret = !$this->policy_setting['bypass_' . $type . '_checks'];
+        }
+
+        return $ret;
     }
 
     public function is_delivery($type,$method)
@@ -199,6 +206,11 @@ class ldap_driver extends amacube_driver
         }
 
         return false;
+    }
+
+    public function is_supported($setting)
+    {
+        return array_key_exists($settings, $amavis_mappings);
     }
 
 }
