@@ -113,7 +113,6 @@ class ldap_driver extends amacube_driver
 
         if ($results->count() == 1) {
             $entries = $results->entries(true);
-            write_log('amacube', sprintf("entries: %s", var_export($entries, true)));
             foreach ($entries as $dn => $entry) {
                 foreach ($this->policy_setting as $key => $value) {
                     if (array_key_exists($key, $this->amavis_mappings)) {
