@@ -84,9 +84,7 @@ class amacube extends rcube_plugin
         $this->add_texts('localization/', true);
 
         // Register tasks & actions
-        if ($this->task == 'settings') {
-            $this->register_action('plugin.amacube-settings', array($this, 'settings_init'));
-        }
+        $this->register_action('plugin.amacube-settings', array($this, 'settings_init'));
 
         // Add quarantine specific task and action only when we want to use quarantine
         if ($this->rc->config->get('amacube_quarantine_enabled')) {
@@ -119,10 +117,8 @@ class amacube extends rcube_plugin
     // Initialize GUI
     function gui_init()
     {
-        if ($this->task == 'settings') {
-            // Add settings tab
-            $this->add_hook('settings_actions', array($this, 'settings_actions'));
-        }
+        // Add settings tab
+        $this->add_hook('settings_actions', array($this, 'settings_actions'));
 
         if ($this->rc->config->get('amacube_quarantine_enabled')) {
             // Add taskbar button
@@ -228,8 +224,12 @@ class amacube extends rcube_plugin
         $string  = '';
         $string .= $this->_show_radio('spam_delivery_deliver', 'spam_delivery', 'deliver', $this->amacube->driver->is_delivery('spam', 'deliver')) . ' ';
         $string .= html::label('spam_delivery_deliver', $this->gettext('deliver'));
-        $string .= $this->_show_radio('spam_delivery_quarantine', 'spam_delivery', 'quarantine', $this->amacube->driver->is_delivery('spam', 'quarantine')) . ' ';
-        $string .= html::label('spam_delivery_quarantine', $this->gettext('quarantine'));
+
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            $string .= $this->_show_radio('spam_delivery_quarantine', 'spam_delivery', 'quarantine', $this->amacube->driver->is_delivery('spam', 'quarantine')) . ' ';
+            $string .= html::label('spam_delivery_quarantine', $this->gettext('quarantine'));
+        }
+
         $string .= $this->_show_radio('spam_delivery_discard', 'spam_delivery', 'discard', $this->amacube->driver->is_delivery('spam', 'discard'));
         $string .= html::label('spam_delivery_discard', $this->gettext('discard'));
         $output_table->add('', $string);
@@ -239,8 +239,12 @@ class amacube extends rcube_plugin
         $string  = '';
         $string .= $this->_show_radio('virus_delivery_deliver', 'virus_delivery', 'deliver', $this->amacube->driver->is_delivery('virus', 'deliver')) . ' ';
         $string .= html::label('virus_delivery_deliver', $this->gettext('deliver'));
-        $string .= $this->_show_radio('virus_delivery_quarantine', 'virus_delivery', 'quarantine', $this->amacube->driver->is_delivery('virus', 'quarantine')) . ' ';
-        $string .= html::label('virus_delivery_quarantine', $this->gettext('quarantine'));
+
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            $string .= $this->_show_radio('virus_delivery_quarantine', 'virus_delivery', 'quarantine', $this->amacube->driver->is_delivery('virus', 'quarantine')) . ' ';
+            $string .= html::label('virus_delivery_quarantine', $this->gettext('quarantine'));
+        }
+
         $string .= $this->_show_radio('virus_delivery_discard', 'virus_delivery', 'discard', $this->amacube->driver->is_delivery('virus', 'discard'));
         $string .= html::label('virus_delivery_discard', $this->gettext('discard'));
         $output_table->add('', $string);
@@ -250,8 +254,12 @@ class amacube extends rcube_plugin
         $string  = '';
         $string .= $this->_show_radio('banned_delivery_deliver', 'banned_delivery', 'deliver', $this->amacube->driver->is_delivery('banned', 'deliver')) . ' ';
         $string .= html::label('banned_delivery_deliver', $this->gettext('deliver'));
-        $string .= $this->_show_radio('banned_delivery_quarantine', 'banned_delivery', 'quarantine', $this->amacube->driver->is_delivery('banned', 'quarantine')) . ' ';
-        $string .= html::label('banned_delivery_quarantine', $this->gettext('quarantine'));
+
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            $string .= $this->_show_radio('banned_delivery_quarantine', 'banned_delivery', 'quarantine', $this->amacube->driver->is_delivery('banned', 'quarantine')) . ' ';
+            $string .= html::label('banned_delivery_quarantine', $this->gettext('quarantine'));
+        }
+
         $string .= $this->_show_radio('banned_delivery_discard', 'banned_delivery', 'discard', $this->amacube->driver->is_delivery('banned', 'discard'));
         $string .= html::label('banned_delivery_discard', $this->gettext('discard'));
         $output_table->add('', $string);
@@ -261,8 +269,12 @@ class amacube extends rcube_plugin
         $string  = '';
         $string .= $this->_show_radio('badheader_delivery_deliver', 'badheader_delivery', 'deliver', $this->amacube->driver->is_delivery('bad_header', 'deliver')) . ' ';
         $string .= html::label('badheader_delivery_deliver', $this->gettext('deliver'));
-        $string .= $this->_show_radio('badheader_delivery_quarantine', 'badheader_delivery', 'quarantine', $this->amacube->driver->is_delivery('bad_header', 'quarantine')) . ' ';
-        $string .= html::label('badheader_delivery_quarantine', $this->gettext('quarantine'));
+
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            $string .= $this->_show_radio('badheader_delivery_quarantine', 'badheader_delivery', 'quarantine', $this->amacube->driver->is_delivery('bad_header', 'quarantine')) . ' ';
+            $string .= html::label('badheader_delivery_quarantine', $this->gettext('quarantine'));
+        }
+
         $string .= $this->_show_radio('badheader_delivery_discard', 'badheader_delivery', 'discard', $this->amacube->driver->is_delivery('bad_header', 'discard'));
         $string .= html::label('badheader_delivery_discard', $this->gettext('discard'));
         $output_table->add('', $string);
@@ -282,9 +294,13 @@ class amacube extends rcube_plugin
         // Create output : table : input : sa_kill_level
         $output_table->add('title', html::label('spam_kill_level', $this->gettext('spam_kill_level')));
         $output_table->add('', $this->_show_inputfield('spam_kill_level', $this->amacube->driver->policy_setting['spam_kill_level']));
-        // Create output : table : input : sa_cutoff_level
-        $output_table->add('title', html::label('spam_quarantine_cutoff_level', $this->gettext('spam_quarantine_cutoff_level')));
-        $output_table->add('', $this->_show_inputfield('spam_quarantine_cutoff_level', $this->amacube->driver->policy_setting['spam_quarantine_cutoff_level']));
+
+        if ($this->rc->config->get('amacube_quarantine_enabled')) {
+            // Create output : table : input : sa_cutoff_level
+            $output_table->add('title', html::label('spam_quarantine_cutoff_level', $this->gettext('spam_quarantine_cutoff_level')));
+            $output_table->add('', $this->_show_inputfield('spam_quarantine_cutoff_level', $this->amacube->driver->policy_setting['spam_quarantine_cutoff_level']));
+        }
+
         // Create output : fieldset
         $output_legend   = html::tag('legend', null, $this->gettext('section_levels'));
         $output_fieldset = html::tag('fieldset', array('class' => 'levels'), $output_legend . $output_table->show());
