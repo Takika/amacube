@@ -3,6 +3,7 @@
 // Available drivers: 'ldap', 'database'
 $rcmail_config['amacube_driver'] = 'ldap';
 
+// The LDAP connection settins where amavis stores settings
 $rcmail_config['amacube_ldap_config'] = array(
     'hosts'           => array(
         '<LDAP-HOST>'
