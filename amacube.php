@@ -292,7 +292,7 @@ class amacube extends rcube_plugin
         $output_legend   = html::tag('legend', null, $this->gettext('section_levels'));
         $output_fieldset = html::tag('fieldset', array('class' => 'levels'), $output_legend . $output_table->show());
         // Create output : levels
-        $output_html = $output_fieldset;
+        $output_html .= $output_fieldset;
 
         $senders = array(
             'whitelist' => false,
