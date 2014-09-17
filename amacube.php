@@ -195,7 +195,7 @@ class amacube extends rcube_plugin
 
         // Create output
         $output_html = "";
-        $output = "";
+        $output      = "";
         // Add header to output
         $output .= html::tag('h1', array('class' => 'boxtitle'), Q($this->gettext('filter_settings_pagetitle')));
 
@@ -270,29 +270,39 @@ class amacube extends rcube_plugin
             $output_html .= $output_fieldset;
         }
 
-        // Create output : table (levels)
-        $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
-        // Create output : table : input : sa_tag_level
-        $output_table->add('title', html::label('spam_tag_level', $this->gettext('spam_tag_level')));
-        $output_table->add('', $this->_show_inputfield('spam_tag_level', $this->amacube->driver->policy_setting['spam_tag_level']));
-        // Create output : table : input : sa_tag2_level
-        $output_table->add('title', html::label('spam_tag2_level', $this->gettext('spam_tag2_level')));
-        $output_table->add('', $this->_show_inputfield('spam_tag2_level', $this->amacube->driver->policy_setting['spam_tag2_level']));
-        // Create output : table : input : sa_kill_level
-        $output_table->add('title', html::label('spam_kill_level', $this->gettext('spam_kill_level')));
-        $output_table->add('', $this->_show_inputfield('spam_kill_level', $this->amacube->driver->policy_setting['spam_kill_level']));
+        $levels = array(
+            'spam_tag'  => false,
+            'spam_tag2' => false,
+            'spam_kill' => false,
+        );
 
         if ($this->rc->config->get('amacube_quarantine_enabled')) {
-            // Create output : table : input : sa_cutoff_level
-            $output_table->add('title', html::label('spam_quarantine_cutoff_level', $this->gettext('spam_quarantine_cutoff_level')));
-            $output_table->add('', $this->_show_inputfield('spam_quarantine_cutoff_level', $this->amacube->driver->policy_setting['spam_quarantine_cutoff_level']));
+            $levels['spam_quarantine_cutoff'] = false;
         }
 
-        // Create output : fieldset
-        $output_legend   = html::tag('legend', null, $this->gettext('section_levels'));
-        $output_fieldset = html::tag('fieldset', array('class' => 'levels'), $output_legend . $output_table->show());
-        // Create output : levels
-        $output_html .= $output_fieldset;
+        foreach (array_keys($levels) as $level) {
+            $levels[$level] = $this->amacube->driver->is_supported($level . '_level');
+        }
+
+        $levels = array_filter($levels);
+
+        if (count($levels)) {
+            // Create output : table (levels)
+            $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
+
+            // Create output : table : input : sa tag levels
+            foreach (array_keys($levels) as $level) {
+                $output_table->add('title', html::label($level . '_level', $this->gettext($level . '_level')));
+                $output_table->add('', $this->_show_inputfield($level . '_level', $this->amacube->driver->policy_setting[$level . '_level']));
+            }
+
+            // Create output : fieldset
+            $output_legend   = html::tag('legend', null, $this->gettext('section_levels'));
+            $output_fieldset = html::tag('fieldset', array('class' => 'levels'), $output_legend . $output_table->show());
+
+            // Create output : levels
+            $output_html .= $output_fieldset;
+        }
 
         $senders = array(
             'whitelist' => false,
