@@ -42,6 +42,10 @@ $rcmail_config['amacube_accounts_db_enabled'] = false;
 // Set this variable to true if you want to use quarantine features
 $rcmail_config['amacube_quarantine_enabled'] = false;
 
+// Minimum and maximum values of amavis tag levels
+$rcmail_config['amacube_amavis_tag_level_min'] = -20;
+$rcmail_config['amacube_amavis_tag_level_max'] = 999;
+
 // The database connection settings where mailbox accounts are stored.
 // When specified amacube will try to get catchall and filter fields from this table
 // See mysql.schema for more details.
