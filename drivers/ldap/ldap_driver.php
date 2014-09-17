@@ -39,8 +39,6 @@ class ldap_driver extends amacube_driver
 
     protected $ldap;
 
-    public $initialized = false;
-
     public function __construct($amacube)
     {
         $this->amacube = $amacube;

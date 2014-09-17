@@ -2,14 +2,16 @@
 
 abstract class amacube_driver
 {
+    public $initialized = false;
+
     // USER SETTINGS
-    public $user_pk; // primary key for the user record
+    public $user_pk;       // primary key for the user record
     private $priority = 7; // we do not change the amavis default for that
-    public $fullname; // Full Name of the user, for reference, Amavis does not use that
+    public $fullname;      // Full Name of the user, for reference, Amavis does not use that
 
     // POLICY SETTINGS
-    public $policy_pk; // primary key of the policy record
-    public $policy_name; // Name of the policy, for reference, Amavis does not use that
+    public $policy_pk;     // primary key of the policy record
+    public $policy_name;   // Name of the policy, for reference, Amavis does not use that
     public $policy_setting = array(
         'virus_lover'                  => false, // bool
         'spam_lover'                   => false, // bool
