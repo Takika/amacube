@@ -235,65 +235,75 @@ class amacube extends rcube_plugin
         // Create output : table (delivery)
         $output_table = new html_table(array('cols' => 2, 'cellpadding' => 3, 'class' => 'propform'));
 
-        // Create output : table : radios : spam
-        $output_table->add('title', $this->gettext('spam_delivery'));
-        $string  = '';
-        $string .= $this->_show_radio('spam_delivery_deliver', 'spam_delivery', 'deliver', $this->amacube->driver->is_delivery('spam', 'deliver')) . ' ';
-        $string .= html::label('spam_delivery_deliver', $this->gettext('deliver'));
+        // Only show the radio buttons if the user can change this settings
+        if ($this->amacube->driver->is_supported('spam_lover')) {
+            // Create output : table : radios : spam
+            $output_table->add('title', $this->gettext('spam_delivery'));
+            $string  = '';
+            $string .= $this->_show_radio('spam_delivery_deliver', 'spam_delivery', 'deliver', $this->amacube->driver->is_delivery('spam', 'deliver')) . ' ';
+            $string .= html::label('spam_delivery_deliver', $this->gettext('deliver'));
 
-        if ($this->rc->config->get('amacube_quarantine_enabled')) {
-            $string .= $this->_show_radio('spam_delivery_quarantine', 'spam_delivery', 'quarantine', $this->amacube->driver->is_delivery('spam', 'quarantine')) . ' ';
-            $string .= html::label('spam_delivery_quarantine', $this->gettext('quarantine'));
+            if ($this->rc->config->get('amacube_quarantine_enabled')) {
+                $string .= $this->_show_radio('spam_delivery_quarantine', 'spam_delivery', 'quarantine', $this->amacube->driver->is_delivery('spam', 'quarantine')) . ' ';
+                $string .= html::label('spam_delivery_quarantine', $this->gettext('quarantine'));
+            }
+
+            $string .= $this->_show_radio('spam_delivery_discard', 'spam_delivery', 'discard', $this->amacube->driver->is_delivery('spam', 'discard'));
+            $string .= html::label('spam_delivery_discard', $this->gettext('discard'));
+            $output_table->add('', $string);
         }
 
-        $string .= $this->_show_radio('spam_delivery_discard', 'spam_delivery', 'discard', $this->amacube->driver->is_delivery('spam', 'discard'));
-        $string .= html::label('spam_delivery_discard', $this->gettext('discard'));
-        $output_table->add('', $string);
+        // Only show the radio buttons if the user can change this settings
+        if ($this->amacube->driver->is_supported('virus_lover')) {
+            // Create output : table : radios : virus
+            $output_table->add('title', $this->gettext('virus_delivery'));
+            $string  = '';
+            $string .= $this->_show_radio('virus_delivery_deliver', 'virus_delivery', 'deliver', $this->amacube->driver->is_delivery('virus', 'deliver')) . ' ';
+            $string .= html::label('virus_delivery_deliver', $this->gettext('deliver'));
 
-        // Create output : table : radios : virus
-        $output_table->add('title', $this->gettext('virus_delivery'));
-        $string  = '';
-        $string .= $this->_show_radio('virus_delivery_deliver', 'virus_delivery', 'deliver', $this->amacube->driver->is_delivery('virus', 'deliver')) . ' ';
-        $string .= html::label('virus_delivery_deliver', $this->gettext('deliver'));
+            if ($this->rc->config->get('amacube_quarantine_enabled')) {
+                $string .= $this->_show_radio('virus_delivery_quarantine', 'virus_delivery', 'quarantine', $this->amacube->driver->is_delivery('virus', 'quarantine')) . ' ';
+                $string .= html::label('virus_delivery_quarantine', $this->gettext('quarantine'));
+            }
 
-        if ($this->rc->config->get('amacube_quarantine_enabled')) {
-            $string .= $this->_show_radio('virus_delivery_quarantine', 'virus_delivery', 'quarantine', $this->amacube->driver->is_delivery('virus', 'quarantine')) . ' ';
-            $string .= html::label('virus_delivery_quarantine', $this->gettext('quarantine'));
+            $string .= $this->_show_radio('virus_delivery_discard', 'virus_delivery', 'discard', $this->amacube->driver->is_delivery('virus', 'discard'));
+            $string .= html::label('virus_delivery_discard', $this->gettext('discard'));
+            $output_table->add('', $string);
         }
 
-        $string .= $this->_show_radio('virus_delivery_discard', 'virus_delivery', 'discard', $this->amacube->driver->is_delivery('virus', 'discard'));
-        $string .= html::label('virus_delivery_discard', $this->gettext('discard'));
-        $output_table->add('', $string);
+        if ($this->amacube->driver->is_supported('banned_lover')) {
+            // Create output : table : radios : banned
+            $output_table->add('title', $this->gettext('banned_delivery'));
+            $string  = '';
+            $string .= $this->_show_radio('banned_delivery_deliver', 'banned_delivery', 'deliver', $this->amacube->driver->is_delivery('banned', 'deliver')) . ' ';
+            $string .= html::label('banned_delivery_deliver', $this->gettext('deliver'));
 
-        // Create output : table : radios : banned
-        $output_table->add('title', $this->gettext('banned_delivery'));
-        $string  = '';
-        $string .= $this->_show_radio('banned_delivery_deliver', 'banned_delivery', 'deliver', $this->amacube->driver->is_delivery('banned', 'deliver')) . ' ';
-        $string .= html::label('banned_delivery_deliver', $this->gettext('deliver'));
+            if ($this->rc->config->get('amacube_quarantine_enabled')) {
+                $string .= $this->_show_radio('banned_delivery_quarantine', 'banned_delivery', 'quarantine', $this->amacube->driver->is_delivery('banned', 'quarantine')) . ' ';
+                $string .= html::label('banned_delivery_quarantine', $this->gettext('quarantine'));
+            }
 
-        if ($this->rc->config->get('amacube_quarantine_enabled')) {
-            $string .= $this->_show_radio('banned_delivery_quarantine', 'banned_delivery', 'quarantine', $this->amacube->driver->is_delivery('banned', 'quarantine')) . ' ';
-            $string .= html::label('banned_delivery_quarantine', $this->gettext('quarantine'));
+            $string .= $this->_show_radio('banned_delivery_discard', 'banned_delivery', 'discard', $this->amacube->driver->is_delivery('banned', 'discard'));
+            $string .= html::label('banned_delivery_discard', $this->gettext('discard'));
+            $output_table->add('', $string);
         }
 
-        $string .= $this->_show_radio('banned_delivery_discard', 'banned_delivery', 'discard', $this->amacube->driver->is_delivery('banned', 'discard'));
-        $string .= html::label('banned_delivery_discard', $this->gettext('discard'));
-        $output_table->add('', $string);
+        if ($this->amacube->driver->is_supported('header_lover')) {
+            // Create output : table : radios : bad_header
+            $output_table->add('title', $this->gettext('bad_header_delivery'));
+            $string  = '';
+            $string .= $this->_show_radio('badheader_delivery_deliver', 'badheader_delivery', 'deliver', $this->amacube->driver->is_delivery('bad_header', 'deliver')) . ' ';
+            $string .= html::label('badheader_delivery_deliver', $this->gettext('deliver'));
 
-        // Create output : table : radios : bad_header
-        $output_table->add('title', $this->gettext('bad_header_delivery'));
-        $string  = '';
-        $string .= $this->_show_radio('badheader_delivery_deliver', 'badheader_delivery', 'deliver', $this->amacube->driver->is_delivery('bad_header', 'deliver')) . ' ';
-        $string .= html::label('badheader_delivery_deliver', $this->gettext('deliver'));
+            if ($this->rc->config->get('amacube_quarantine_enabled')) {
+                $string .= $this->_show_radio('badheader_delivery_quarantine', 'badheader_delivery', 'quarantine', $this->amacube->driver->is_delivery('bad_header', 'quarantine')) . ' ';
+                $string .= html::label('badheader_delivery_quarantine', $this->gettext('quarantine'));
+            }
 
-        if ($this->rc->config->get('amacube_quarantine_enabled')) {
-            $string .= $this->_show_radio('badheader_delivery_quarantine', 'badheader_delivery', 'quarantine', $this->amacube->driver->is_delivery('bad_header', 'quarantine')) . ' ';
-            $string .= html::label('badheader_delivery_quarantine', $this->gettext('quarantine'));
+            $string .= $this->_show_radio('badheader_delivery_discard', 'badheader_delivery', 'discard', $this->amacube->driver->is_delivery('bad_header', 'discard'));
+            $string .= html::label('badheader_delivery_discard', $this->gettext('discard'));
+            $output_table->add('', $string);
         }
-
-        $string .= $this->_show_radio('badheader_delivery_discard', 'badheader_delivery', 'discard', $this->amacube->driver->is_delivery('bad_header', 'discard'));
-        $string .= html::label('badheader_delivery_discard', $this->gettext('discard'));
-        $output_table->add('', $string);
 
         // Create output : fieldset
         $output_legend   = html::tag('legend', null, $this->gettext('section_delivery'));
