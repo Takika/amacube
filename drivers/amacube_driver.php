@@ -11,34 +11,34 @@ abstract class amacube_driver
     public $policy_pk; // primary key of the policy record
     public $policy_name; // Name of the policy, for reference, Amavis does not use that
     public $policy_setting = array(
-        'virus_lover' => false,         // bool
-        'spam_lover' => false,          // bool
-        'unchecked_lover' => false,     // bool
-        'banned_files_lover' => false,  // bool
-        'bad_header_lover' => false,    // bool
-        'bypass_virus_checks' => false, // bool
-        'bypass_spam_checks' => false,  // bool
-        'bypass_banned_checks' => false,// bool
-        'bypass_header_checks' => false,// bool
-        'spam_modifies_subj' => true,   // bool
-        'spam_tag_level' => 3,          // float
-        'spam_tag2_level' => 8,         // float
-        'spam_tag3_level' => 999,       // float
-        'spam_kill_level' => 999,       // float
-        'spam_dsn_cutoff_level' => 10,  // float
-        'spam_quarantine_cutoff_level' => 20, // float
+        'virus_lover'                  => false, // bool
+        'spam_lover'                   => false, // bool
+        'unchecked_lover'              => false, // bool
+        'banned_files_lover'           => false, // bool
+        'bad_header_lover'             => false, // bool
+        'bypass_virus_checks'          => false, // bool
+        'bypass_spam_checks'           => false, // bool
+        'bypass_banned_checks'         => false, // bool
+        'bypass_header_checks'         => false, // bool
+        'spam_modifies_subj'           => true,  // bool
+        'spam_tag_level'               => 3,     // float
+        'spam_tag2_level'              => 8,     // float
+        'spam_tag3_level'              => 999,   // float
+        'spam_kill_level'              => 999,   // float
+        'spam_dsn_cutoff_level'        => 10,    // float
+        'spam_quarantine_cutoff_level' => 20,    // float
 
-        'virus_quarantine_to' => true,      // string 'sql:', but treated as boolean
-        'spam_quarantine_to' => false,      // string 'sql:', but treated as boolean
-        'banned_quarantine_to' => false,    // string 'sql:', but treated as boolean
+        'virus_quarantine_to'  => true,          // string 'sql:', but treated as boolean
+        'spam_quarantine_to'   => false,         // string 'sql:', but treated as boolean
+        'banned_quarantine_to' => false,         // string 'sql:', but treated as boolean
 
         'whitelist_sender' => array(),
         'blacklist_sender' => array(),
 
-        'unchecked_quarantine_to' => '',    // unused
-        'bad_header_quarantine_to' => '',   // unused
-        'clean_quarantine_to' => '',        // unused
-        'archive_quarantine_to' => '',      // unused
+        'unchecked_quarantine_to'  => '',        // unused
+        'bad_header_quarantine_to' => '',        // unused
+        'clean_quarantine_to'      => '',        // unused
+        'archive_quarantine_to'    => '',        // unused
     );
 
     // class variables(static), the same in all instances:
