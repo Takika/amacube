@@ -159,7 +159,7 @@ abstract class amacube_driver
 
         foreach ($this->numeric_settings as $var) {
             if (is_numeric($array[$var]) === false) {
-                array_push($errors, $var .. ": " . $array[$var] . "___" . gettype($array[$var]));
+                array_push($errors, $var . ": " . $array[$var] . "___" . gettype($array[$var]));
             }
         }
 
