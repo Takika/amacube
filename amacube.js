@@ -77,6 +77,15 @@ if (window.rcmail) {
 	// Init buttons & commands
     rcmail.addEventListener('init', function(evt) {
         if (evt.task == 'settings') {
+            var tab = $('<span>').attr('id', 'settingstabpluginamacube').addClass('tablink amacube');
+            var button = $('<a>').attr('href', rcmail.env.comm_path+'&_action=plugin.amacube-settings')
+                .attr('title', rcmail.gettext('amacube.filter_settings_pagetitle'))
+                .html(rcmail.gettext('amacube.filter_settings_pagetitle'))
+                .appendTo(tab);
+
+            // add tab
+            rcmail.add_element(tab, 'tabs');
+
 	        // Settings post command
 	        rcmail.register_command('plugin.amacube-settings-post', function() { rcmail.gui_objects.amacubeform.submit(); }, true);
         }
