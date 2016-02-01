@@ -22,7 +22,7 @@ abstract class amacube_driver
         'bypass_spam_checks'           => false, // bool
         'bypass_banned_checks'         => false, // bool
         'bypass_header_checks'         => false, // bool
-        'spam_modifies_subj'           => true,  // bool
+        // 'spam_modifies_subj'           => true,  // bool
         'spam_tag_level'               => 3,     // float
         'spam_tag2_level'              => 8,     // float
         'spam_tag3_level'              => 999,   // float
@@ -30,7 +30,7 @@ abstract class amacube_driver
         'spam_dsn_cutoff_level'        => 10,    // float
         'spam_quarantine_cutoff_level' => 20,    // float
 
-        'virus_quarantine_to'  => true,          // string 'sql:', but treated as boolean
+        'virus_quarantine_to'  => false,         // string 'sql:', but treated as boolean
         'spam_quarantine_to'   => false,         // string 'sql:', but treated as boolean
         'banned_quarantine_to' => false,         // string 'sql:', but treated as boolean
 
@@ -54,7 +54,7 @@ abstract class amacube_driver
             'bypass_spam_checks',
             'bypass_banned_checks',
             'bypass_header_checks',
-            'spam_modifies_subj',
+            // 'spam_modifies_subj',
             'virus_quarantine_to',
             'spam_quarantine_to',
             'banned_quarantine_to',
